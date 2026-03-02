@@ -29,6 +29,7 @@ THIRD_PARTY_APPS = [
     "rest_framework",
     "rest_framework_simplejwt",
     "corsheaders",
+    "django_filters",
 ]
 
 # Наши локальные приложения, которые мы создаем для реализации бизнес-логики нашего проекта
@@ -159,6 +160,15 @@ REST_FRAMEWORK = {
     "DEFAULT_PARSER_CLASSES": [
         "rest_framework.parsers.JSONParser",  # Принимаем данные в формате JSON
     ],
+    "DEFAULT_FILTER_BACKENDS": [
+        "django_filters.rest_framework.DjangoFilterBackend", # Фильтрация по полям модели
+        ],
+    
+    "DEFAULT_PAGINATION_CLASS": 
+        "rest_framework.pagination.PageNumberPagination", # Пагинация по номеру страницы
+
+    "PAGE_SIZE": 
+        12, # Количество объектов на странице при пагинации
 }
 
 if DEBUG:
@@ -191,6 +201,7 @@ SECURE_BROWSER_XSS_FILTER = True # Включаем защиту от XSS ата
 X_FRAME_OPTIONS = "DENY" # Запрещаем отображение сайта в iframe (защита от кликджекинга)
 SECURE_CONTENT_TYPE_NOSNIFF = True # Защита от MIME-атаки (не даём отправлять .exe файлы вместо изображений и т.д.)
 
+APPEND_SLASH = False
 
 LOGGING = {
     "version": 1,
