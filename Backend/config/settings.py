@@ -12,7 +12,11 @@ SECRET_KEY = config("SECRET_KEY")
 DEBUG = config("DEBUG", default=False, cast=bool)
 
 # Разрешенные хосты для подключения к серверу нашего Django-приложения 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1',]
+ALLOWED_HOSTS =  config(
+    "ALLOWED_HOSTS",
+    default="localhost,127.0.0.1",
+    cast=lambda v: [s.strip() for s in v.split(",") if s.strip()],
+)
 
 # Стандартные приложения Django, которые идут по умолчанию
 DJANGO_APPS = [
@@ -46,6 +50,7 @@ INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -93,6 +98,22 @@ DATABASES = {
         }
     }
 }
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': config('POSTGRES_DB', default='medicalevents'),
+        'USER': config('POSTGRES_USER', default='postgres'),
+        'PASSWORD': config('POSTGRES_PASSWORD'),
+        'HOST': config('DB_HOST', default='localhost'),
+        'PORT': config('DB_PORT', default='5432', cast=int),
+        'ATOMIC_REQUESTS': True,
+        'CONN_MAX_AGE': config('DB_CONN_MAX_AGE', default=60, cast=int),
+        "OPTIONS": {
+            "sslmode": config("DB_SSLMODE", default="require"),
+        }
+    }
+}
 AUTH_USER_MODEL = "users.User"  # Указываем кастомную модель пользователя
 
 # Валидация паролей
@@ -118,18 +139,17 @@ TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True
 
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
 STORAGES = {
     "default": {
-        "BACKEND": "storages.backends.azure_storage.AzureStorage",
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
     },
     "staticfiles": {
-        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
 }
-
-# Статические файлы (CSS, JavaScript, Images)
-STATIC_URL = "/static/"
-STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 
 # Media files
@@ -201,24 +221,40 @@ SECURE_BROWSER_XSS_FILTER = True # Включаем защиту от XSS ата
 X_FRAME_OPTIONS = "DENY" # Запрещаем отображение сайта в iframe (защита от кликджекинга)
 SECURE_CONTENT_TYPE_NOSNIFF = True # Защита от MIME-атаки (не даём отправлять .exe файлы вместо изображений и т.д.)
 
-APPEND_SLASH = False
 
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
-    "handlers": {
-        "file": {
-            "level": "DEBUG", # Уровень логов
-            "class": "logging.FileHandler", # Логируем в файл
-            "filename": BASE_DIR / "debug.log", # Путь к файлу логов
-            'encoding': 'utf-8',  
+    "formatters": {
+        "standard": {
+            "format": "%(asctime)s [%(levelname)s] %(name)s: %(message)s",
         },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "standard",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "INFO",
     },
     "loggers": {
         "django": {
-            "handlers": ["file"], # Используемый хендлер
-            "level": "DEBUG", # Уровень логов
-            "propagate": True, # Распространяем логи родительским логгерам
+            "handlers": ["console"],
+            "level": "DEBUG" if DEBUG else "INFO",
+            "propagate": False,
         },
     },
 }
+
+# S3 хранилище для медиа файлов
+AWS_ACCESS_KEY_ID = config("AWS_ACCESS_KEY_ID", default="")
+AWS_SECRET_ACCESS_KEY = config("AWS_SECRET_ACCESS_KEY", default="")
+AWS_STORAGE_BUCKET_NAME = config("AWS_STORAGE_BUCKET_NAME")
+AWS_S3_REGION_NAME = config("AWS_S3_REGION_NAME", default="eu-north-1")
+AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com"
+
+AWS_S3_PUBLIC = config("AWS_S3_PUBLIC", default=True, cast=bool)
+AWS_QUERYSTRING_AUTH = False

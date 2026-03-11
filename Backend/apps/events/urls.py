@@ -11,3 +11,4 @@ router.register(r"cards", CardViewSet, basename="card")
 urlpatterns = [
     path("", include(router.urls)),
 ]
+
