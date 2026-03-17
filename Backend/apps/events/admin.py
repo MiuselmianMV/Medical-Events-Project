@@ -6,6 +6,7 @@ from .models import Specialty, Event, Card
 from .s3_service import upload_card_photo_to_s3
  
 admin.site.index_title = "Керування контентом сайту"
+
 @admin.register(Specialty)
 class SpecialtyAdmin(admin.ModelAdmin):
     list_display = ("name",)

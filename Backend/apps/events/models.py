@@ -18,8 +18,14 @@ class Specialty(models.Model):
         return self.name
 
     def save(self, *args, **kwargs):
-        if not self.slug:
+        if not self.pk:
             self.slug = slugify(self.name)
+
+        else:
+            old = Specialty.objects.filter(pk=self.pk).first()
+            if old and old.name != self.name:
+                self.slug = slugify(self.name)
+
         super().save(*args, **kwargs)
 
 
@@ -62,8 +68,14 @@ class Event(models.Model):
     
     
     def save(self, *args, **kwargs):
-        if not self.slug:
+        if not self.pk:
             self.slug = slugify(self.title)
+
+        else:
+            old = Event.objects.filter(pk=self.pk).first()
+            if old and old.title != self.title:
+                self.slug = slugify(self.title)
+
         super().save(*args, **kwargs)
 
 
@@ -80,8 +92,14 @@ class Card(models.Model):
     slug = models.SlugField(max_length=100, unique=True, verbose_name="Slug")
     
     def save(self, *args, **kwargs):
-        if not self.slug:
+        if not self.pk:
             self.slug = slugify(self.title)
+
+        else:
+            old = Card.objects.filter(pk=self.pk).first()
+            if old and old.title != self.title:
+                self.slug = slugify(self.title)
+
         super().save(*args, **kwargs)
     
     def __str__(self):

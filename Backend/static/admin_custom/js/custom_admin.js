@@ -69,7 +69,6 @@ function localizeSelectors() {
 }
 
 function localizeChangeListTexts() {
-    // Заголовки вида "Select <model> to change"
     document.querySelectorAll("h1").forEach(function (el) {
         const text = el.textContent.trim();
 
@@ -81,7 +80,6 @@ function localizeChangeListTexts() {
         }
     });
 
-    // Кнопки и подписи на странице списка
     document.querySelectorAll("a, button, input[type='submit'], label, option").forEach(function (el) {
         const text = el.textContent ? el.textContent.trim() : "";
         const value = el.value ? el.value.trim() : "";
@@ -95,7 +93,6 @@ function localizeChangeListTexts() {
         if (text === "Action:") el.textContent = "Дія:";
     });
 
-    // Плейсхолдер и aria-label поиска
     document.querySelectorAll("input[type='search'], input[name='q']").forEach(function (input) {
         if (!input.placeholder || input.placeholder === "Search") {
             input.placeholder = "Пошук";
@@ -105,8 +102,7 @@ function localizeChangeListTexts() {
         }
     });
 
-    // "0 of 3 selected"
-    document.querySelectorAll("span.action-counter, .action-counter").forEach(function (el) {
+    document.querySelectorAll(".action-counter, span.action-counter").forEach(function (el) {
         const text = el.textContent.trim();
         const match = text.match(/^(\d+)\s+of\s+(\d+)\s+selected$/i);
 
@@ -117,7 +113,6 @@ function localizeChangeListTexts() {
         }
     });
 
-    // Опции action select
     document.querySelectorAll("select option").forEach(function (option) {
         const text = option.textContent.trim();
 
@@ -128,6 +123,31 @@ function localizeChangeListTexts() {
         if (text === "Delete selected users") option.textContent = "Видалити вибраних користувачів";
         if (text === "Delete selected") option.textContent = "Видалити вибране";
     });
+}
+
+function simplifyActionsBar() {
+    const select = document.querySelector(".actions select");
+    const label = document.querySelector(".actions label");
+    const counter = document.querySelector(".action-counter");
+
+    if (!select) return;
+
+    // скрываем label и select
+    if (label) label.style.display = "none";
+    select.style.display = "none";
+
+    // меняем текст кнопки
+    const button = document.querySelector(".actions button, .actions input[type='submit']");
+    if (button) {
+        if (button.tagName === "INPUT") {
+            button.value = "Видалити вибране";
+        } else {
+            button.textContent = "Видалити вибране";
+        }
+    }
+
+    // автоматически выбираем delete selected
+    select.value = select.options[1]?.value || "";
 }
 
 function localizeAdminTexts() {
@@ -169,6 +189,10 @@ document.addEventListener("DOMContentLoaded", function () {
     localizeSelectors();
     localizeAdminTexts();
     localizeChangeListTexts();
+    simplifyActionsBar();
+
+    setTimeout(simplifyActionsBar, 150);
+    setTimeout(simplifyActionsBar, 500);
 
     setTimeout(localizeSelectors, 150);
     setTimeout(localizeSelectors, 500);
