@@ -35,6 +35,7 @@ class EventSerializer(serializers.ModelSerializer):
             "card_id",
             "event_type",
             "status",
+            "form_url",
         ]
         read_only_fields = ["slug"]
 

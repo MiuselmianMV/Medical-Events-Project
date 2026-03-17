@@ -1,9 +1,14 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as DjangoUserAdmin
 from django.utils.translation import gettext_lazy as _
+from django.contrib.auth.models import Group
 
 from .models import User
 
+try:
+    admin.site.unregister(Group)
+except admin.sites.NotRegistered:
+    pass
 
 @admin.register(User)
 class UserAdmin(DjangoUserAdmin):

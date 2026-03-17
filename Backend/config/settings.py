@@ -34,6 +34,7 @@ THIRD_PARTY_APPS = [
     "rest_framework_simplejwt",
     "corsheaders",
     "django_filters",
+
 ]
 
 # Наши локальные приложения, которые мы создаем для реализации бизнес-логики нашего проекта
@@ -52,6 +53,7 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -67,7 +69,7 @@ ROOT_URLCONF = "config.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -80,24 +82,8 @@ TEMPLATES = [
 ]
 
 
-
 WSGI_APPLICATION = "config.wsgi.application"
 
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('POSTGRES_DB', default='medicalevents'),
-        'USER': config('POSTGRES_USER', default='postgres'),
-        'PASSWORD': config('POSTGRES_PASSWORD'),
-        'HOST': config('DB_HOST', default='localhost'),
-        'PORT': config('DB_PORT', default='5432', cast=int),
-        'ATOMIC_REQUESTS': True,
-        "OPTIONS": {
-            "sslmode": "require",
-        }
-    }
-}
 
 DATABASES = {
     'default': {
@@ -134,20 +120,34 @@ AUTH_PASSWORD_VALIDATORS = [
 
 
 # Настройки интернационализации
-LANGUAGE_CODE = "en-us"
+LANGUAGE_CODE = "uk"
+
 TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True
 
+LANGUAGES = [
+    ('uk', 'Ukrainian'),
+    ('en', 'English'),
+]
+
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
+
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
+
+LOCALE_PATHS = [
+    BASE_DIR / "locale",
+]
 
 STORAGES = {
     "default": {
         "BACKEND": "django.core.files.storage.FileSystemStorage",
     },
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
     },
 }
 
