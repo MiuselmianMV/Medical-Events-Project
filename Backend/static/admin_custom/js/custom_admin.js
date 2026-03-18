@@ -185,14 +185,47 @@ function localizeAdminTexts() {
     });
 }
 
+function cleanHeaderUserTools() {
+    const userTools = document.querySelector("#user-tools");
+    if (!userTools) return;
+
+    // Убираем "WELCOME,"
+    userTools.childNodes.forEach((node) => {
+        if (node.nodeType === Node.TEXT_NODE) {
+            node.textContent = node.textContent
+                .replace(/WELCOME,\s*/gi, "")
+                .replace(/\s*[./]\s*/g, " ");
+        }
+    });
+
+    // Убираем текстовые узлы с ".", "/"
+    Array.from(userTools.childNodes).forEach((node) => {
+        if (node.nodeType === Node.TEXT_NODE) {
+            const cleaned = node.textContent.replace(/[./]/g, "").trim();
+            if (!cleaned) {
+                node.remove();
+            } else {
+                node.textContent = cleaned + " ";
+            }
+        }
+    });
+
+    // Переводим ссылки, если ещё не переведены
+    userTools.querySelectorAll("a").forEach((link) => {
+        const text = link.textContent.trim();
+
+        if (text === "View site") link.textContent = "Переглянути сайт";
+        if (text === "Change password") link.textContent = "Змінити пароль";
+        if (text === "Log out") link.textContent = "Вийти";
+    });
+}
+
 document.addEventListener("DOMContentLoaded", function () {
     localizeSelectors();
     localizeAdminTexts();
     localizeChangeListTexts();
     simplifyActionsBar();
-
-    setTimeout(simplifyActionsBar, 150);
-    setTimeout(simplifyActionsBar, 500);
+    cleanHeaderUserTools();
 
     setTimeout(localizeSelectors, 150);
     setTimeout(localizeSelectors, 500);
@@ -202,4 +235,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     setTimeout(localizeChangeListTexts, 150);
     setTimeout(localizeChangeListTexts, 500);
+
+    setTimeout(simplifyActionsBar, 150);
+    setTimeout(simplifyActionsBar, 500);
+
+    setTimeout(cleanHeaderUserTools, 150);
+    setTimeout(cleanHeaderUserTools, 500);
 });

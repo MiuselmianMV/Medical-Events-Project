@@ -1,7 +1,7 @@
 {% extends "admin/base.html" %}
 {% load static %}
 
-{% block title %}Medical Events — панель керування{% endblock %}
+{% block title %}meducation — панель керування{% endblock %}
 
 {% block extrastyle %}
     {{ block.super }}
@@ -16,7 +16,8 @@
 {% block branding %}
     <div id="site-branding">
         <h1 id="site-name">
-            <a href="{% url 'admin:index' %}">Medical Events — панель керування</a>
+        <img src="{% static 'admin_custom/img/logotype.png' %}" alt="Logo" height="70">
+            <a href="{% url 'admin:index' %}">meducation — панель керування</a>
         </h1>
     </div>
 {% endblock %}

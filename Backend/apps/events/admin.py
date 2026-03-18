@@ -1,40 +1,42 @@
 from django import forms
 from django.contrib import admin
 from django.utils.html import format_html
-
 from .models import Specialty, Event, Card
 from .s3_service import upload_card_photo_to_s3
- 
+from .admin_base import BaseAdmin
+from .forms import CardAdminForm
+
 admin.site.index_title = "Керування контентом сайту"
 
+
 @admin.register(Specialty)
-class SpecialtyAdmin(admin.ModelAdmin):
+class SpecialtyAdmin(BaseAdmin):
+    change_title = "Редагування спеціальності"
+    add_title = "Додавання спеціальності"
+
     list_display = ("name",)
     search_fields = ("name",)
     ordering = ("name",)
+    readonly_fields = ("slug",)
 
-
-class CardAdminForm(forms.ModelForm):
-    photo = forms.ImageField(
-        required=False,
-        label="Зображення",
-        help_text="Оберіть файл — зображення буде автоматично завантажене в S3, а посилання збережеться."
+    fieldsets = (
+        ("Основна інформація", {
+            "fields": ("name", "slug")
+        }),
     )
 
-    class Meta:
-        model = Card
-        fields = ("title",)
-        
+
 
 
 @admin.register(Card)
-class CardAdmin(admin.ModelAdmin):
-    form = CardAdminForm
+class CardAdmin(BaseAdmin):
+    change_title = "Редагування картки"
+    add_title = "Додавання картки"
 
+    form = CardAdminForm
     list_display = ("title", "image_preview", "photo_link")
     search_fields = ("title",)
     ordering = ("title",)
-
     readonly_fields = ("image_preview_large",)
 
     fieldsets = (
@@ -43,7 +45,7 @@ class CardAdmin(admin.ModelAdmin):
         }),
         ("Зображення", {
             "fields": ("photo", "image_preview_large"),
-            "description": "Можна завантажити нове зображення або використати вже існуюче посилання."
+            "description": "Оберіть файл "
         }),
     )
 
@@ -51,7 +53,6 @@ class CardAdmin(admin.ModelAdmin):
         photo = form.cleaned_data.get("photo")
         if photo:
             obj.photo_url = upload_card_photo_to_s3(photo, key_prefix="cards")
-
         super().save_model(request, obj, form, change)
 
     @admin.display(description="Превʼю")
@@ -66,10 +67,7 @@ class CardAdmin(admin.ModelAdmin):
     @admin.display(description="Посилання")
     def photo_link(self, obj):
         if obj.photo_url:
-            return format_html(
-                '<a href="{}" target="_blank">Відкрити</a>',
-                obj.photo_url
-            )
+            return format_html('<a href="{}" target="_blank">Відкрити</a>', obj.photo_url)
         return "Немає посилання"
 
     @admin.display(description="Поточне зображення")
@@ -83,7 +81,10 @@ class CardAdmin(admin.ModelAdmin):
 
 
 @admin.register(Event)
-class EventAdmin(admin.ModelAdmin):
+class EventAdmin(BaseAdmin):
+    change_title = "Редагування події"
+    add_title = "Додавання події"
+
     list_display = (
         "title",
         "scheduled_datetime",
@@ -94,11 +95,9 @@ class EventAdmin(admin.ModelAdmin):
         "card_preview",
         "form_link",
     )
-
     list_filter = ("event_type", "status", "scheduled_date", "specialties")
     search_fields = ("title", "description", "location")
     ordering = ("scheduled_date", "scheduled_time")
-
     filter_horizontal = ("specialties",)
     autocomplete_fields = ("card",)
 
@@ -142,8 +141,5 @@ class EventAdmin(admin.ModelAdmin):
     @admin.display(description="Форма")
     def form_link(self, obj):
         if obj.form_url:
-            return format_html(
-                '<a href="{}" target="_blank">Відкрити</a>',
-                obj.form_url
-            )
+            return format_html('<a href="{}" target="_blank">Відкрити</a>', obj.form_url)
         return "Немає посилання"
